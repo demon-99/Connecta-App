@@ -1,8 +1,0 @@
-/Users/nikhil/Documents/JavaProjects/MyWorkSpace/Connecta/src/main/java/com/nikhil/Connecta/ConnectaApplication.java
-/Users/nikhil/Documents/JavaProjects/MyWorkSpace/Connecta/src/main/java/com/nikhil/Connecta/configuration/MongoConfig.java
-/Users/nikhil/Documents/JavaProjects/MyWorkSpace/Connecta/src/main/java/com/nikhil/Connecta/configuration/SecurityConfiguration.java
-/Users/nikhil/Documents/JavaProjects/MyWorkSpace/Connecta/src/main/java/com/nikhil/Connecta/controller/ChatController.java
-/Users/nikhil/Documents/JavaProjects/MyWorkSpace/Connecta/src/main/java/com/nikhil/Connecta/dto/MessageDto.java
-/Users/nikhil/Documents/JavaProjects/MyWorkSpace/Connecta/src/main/java/com/nikhil/Connecta/entity/Message.java
-/Users/nikhil/Documents/JavaProjects/MyWorkSpace/Connecta/src/main/java/com/nikhil/Connecta/repository/MessageRepository.java
-/Users/nikhil/Documents/JavaProjects/MyWorkSpace/Connecta/src/main/java/com/nikhil/Connecta/service/ChatService.java
