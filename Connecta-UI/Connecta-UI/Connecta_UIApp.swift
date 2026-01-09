@@ -7,11 +7,14 @@
 
 import SwiftUI
 
+
 @main
 struct Connecta_UIApp: App {
+    @StateObject private var authVM = AuthViewModel() // 🔥
     var body: some Scene {
         WindowGroup {
-            ChatView()
+            AppEntryView()
+                .environmentObject(authVM) // inject environment object
         }
     }
 }

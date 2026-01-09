@@ -8,7 +8,7 @@ import Foundation
 
 class ChatService {
     
-    private let baseURL = "http://172.20.10.3:8080/api/chat"
+    private let baseURL = "http://192.168.1.10:8080/api/chat"
     
     // MARK: - Get Chat History
     func getChatHistory(
