@@ -1,6 +1,7 @@
 package com.nikhil.Connecta.service;
 
 import com.nikhil.Connecta.dto.MessageDto;
+import com.nikhil.Connecta.dto.MessageListResponseDto;
 import com.nikhil.Connecta.entity.Message;
 import com.nikhil.Connecta.repository.MessageRepository;
 import lombok.AllArgsConstructor;
@@ -32,5 +33,10 @@ public class ChatService {
         }
         return messageList;
 
+    }
+    public List<MessageListResponseDto> getChatList(String userName){
+        logger.info("userName {}",userName);
+        List <MessageListResponseDto> messageListResponseDtos = messageRepository.findChatListByUserName(userName);
+        return messageListResponseDtos;
     }
 }

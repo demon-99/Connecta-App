@@ -15,6 +15,7 @@ struct Connecta_UIApp: App {
         WindowGroup {
             AppEntryView()
                 .environmentObject(authVM) // inject environment object
+            
         }
     }
 }

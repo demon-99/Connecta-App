@@ -1,6 +1,7 @@
 package com.nikhil.Connecta.controller;
 
 import com.nikhil.Connecta.dto.MessageDto;
+import com.nikhil.Connecta.dto.MessageListResponseDto;
 import com.nikhil.Connecta.entity.Message;
 import com.nikhil.Connecta.service.ChatService;
 import lombok.AllArgsConstructor;
@@ -34,6 +35,12 @@ public class ChatController {
         logger.info(authorName+" "+receiverName);
         return chatService.getChatHistory(authorName,receiverName);
     }
+
+    @GetMapping("/chats")
+    public List<MessageListResponseDto> getChatList(@RequestParam String userName){
+            return chatService.getChatList(userName);
+    }
+
 
 
     @GetMapping("/**")

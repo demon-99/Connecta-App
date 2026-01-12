@@ -12,8 +12,9 @@ import Foundation
 class AuthService {
     static let shared = AuthService() // Singleton
     
-    private let loginURL = "http://192.168.1.10:8081/api/user/login"
-    private let profileURL = "http://192.168.1.10:8081/api/user/profile"
+    private let loginURL = "http://172.20.10.3:8081/api/user/login"
+    private let profileURL = "http://172.20.10.3:8081/api/user/profile"
+    private let signUpURL = "http://172.20.10.3:8081/api/user/create"
 
     // MARK: - Login
     func login(usernameOrEmail: String, password: String, completion: @escaping (Result<LoginResponseDto, Error>) -> Void) {
@@ -101,6 +102,41 @@ class AuthService {
             }
         }.resume()
     }
+    
+    func signUp(user: SignUpRequest, completion: @escaping (Result<String, Error>) -> Void) {
+            guard let url = URL(string: signUpURL) else {
+                completion(.failure(NetworkError.invalidURL))
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            
+            do {
+                request.httpBody = try JSONEncoder().encode(user)
+            } catch {
+                completion(.failure(NetworkError.encodingError))
+                return
+            }
+            
+            URLSession.shared.dataTask(with: request) { data, response, error in
+                DispatchQueue.main.async {
+                    if let error = error {
+                        completion(.failure(error))
+                        return
+                    }
+                    
+                    guard let httpResponse = response as? HTTPURLResponse,
+                          200..<300 ~= httpResponse.statusCode else {
+                        completion(.failure(NetworkError.noData))
+                        return
+                    }
+                    
+                    completion(.success("User created successfully"))
+                }
+            }.resume()
+        }
 }
 
 // MARK: - Network Errors
