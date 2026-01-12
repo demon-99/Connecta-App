@@ -5,19 +5,18 @@
 //  Created by Nikhil on 08/01/26.
 //
 
-//
-//  ChatView.swift
-//  Connecta-UI
-//
-//  Created by Nikhil on 08/01/26.
-//
-
 import SwiftUI
 
 struct ChatView: View {
+    let receiverName: String
+    
+    @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var viewModel = ChatViewModel()
     @State private var messageText: String = ""
-    @State private var currentUser: String = "Alice"
+    
+    private var currentUserName: String {
+        authVM.currentUser?.username ?? "Unknown"
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -29,15 +28,14 @@ struct ChatView: View {
                         ForEach(viewModel.messages) { msg in
                             MessageBubble(
                                 message: msg,
-                                isCurrentUser: msg.authorName.lowercased() == currentUser.lowercased()
+                                isCurrentUser: msg.authorName.lowercased() == currentUserName.lowercased()
                             )
                             .id(msg.id)
                         }
                     }
                     .padding(.vertical)
                 }
-                // Swift 6 friendly: reacts to messages array changes
-                .task(id: viewModel.messages) {
+                .onChange(of: viewModel.messages.count) { _ in
                     if let last = viewModel.messages.last {
                         withAnimation(.easeInOut) {
                             proxy.scrollTo(last.id, anchor: .bottom)
@@ -50,7 +48,6 @@ struct ChatView: View {
             
             // MARK: - Signal-style Input Bar
             HStack(spacing: 8) {
-                // Optional attachment/plus button
                 Image(systemName: "plus.circle.fill")
                     .font(.system(size: 28))
                     .foregroundColor(.blue)
@@ -82,20 +79,27 @@ struct ChatView: View {
             .padding(.vertical, 6)
             .background(Color(.systemBackground))
         }
-        .navigationBarTitle("Chat", displayMode: .inline)
+        .navigationBarTitle(receiverName, displayMode: .inline)
         .onAppear {
-            viewModel.loadChat()
+            loadChat()
         }
     }
     
+    // MARK: - Load Chat
+    private func loadChat() {
+        let author = currentUserName
+        let receiver = receiverName
+        viewModel.loadChatHistory(authorName: author, receiverName: receiver)
+    }
+    
     // MARK: - Send Message
-    func sendMessage() {
+    private func sendMessage() {
         guard !messageText.isEmpty else { return }
         
         let newMessage = Message(
             id: UUID().uuidString,
-            authorName: currentUser,
-            receiverName: currentUser.lowercased() == "alice" ? "Bob" : "Alice",
+            authorName: currentUserName,
+            receiverName: receiverName,
             message: messageText,
             timestamp: ISO8601DateFormatter().string(from: Date()),
             status: "SENT"
@@ -104,7 +108,6 @@ struct ChatView: View {
         viewModel.messages.append(newMessage)
         messageText = ""
         
-        // Send to backend
         viewModel.sendMessageToBackend(message: newMessage)
     }
 }
@@ -143,7 +146,7 @@ struct MessageBubble: View {
         .padding(.horizontal, 8)
     }
     
-    func formatTime(_ isoString: String) -> String {
+    private func formatTime(_ isoString: String) -> String {
         let formatter = ISO8601DateFormatter()
         if let date = formatter.date(from: isoString) {
             let displayFormatter = DateFormatter()
@@ -154,13 +157,13 @@ struct MessageBubble: View {
     }
     
     @ViewBuilder
-    func statusTickIcon(status: String) -> some View {
+    private func statusTickIcon(status: String) -> some View {
         switch status.uppercased() {
         case "SENT":
             Image(systemName: "checkmark")
                 .foregroundColor(.gray)
         case "DELIVERED":
-            Image(systemName: "checkmark.double")
+            Image(systemName: "checkmark")
                 .foregroundColor(.gray)
         case "READ":
             Image(systemName: "checkmark.double")

@@ -8,46 +8,57 @@
 import SwiftUI
 
 struct ChatRowView: View {
-    let chat: ChatThread
-
+    let chat: ChatListItem
+    
     var body: some View {
         HStack(spacing: 12) {
+            // Avatar
             Circle()
                 .fill(Color.blue)
-                .frame(width: 48, height: 48)
+                .frame(width: 50, height: 50)
                 .overlay(
-                    Text(String(chat.participantName.prefix(1)))
+                    Text(String(chat.receiverName.prefix(1)).uppercased())
                         .foregroundColor(.white)
                         .font(.headline)
                 )
-
+            
+            // Chat info
             VStack(alignment: .leading, spacing: 4) {
-                Text(chat.participantName)
+                Text(chat.receiverName)
                     .font(.headline)
-
-                Text(chat.lastMessage)
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .lineLimit(1)
-            }
-
-            Spacer()
-
-            VStack(alignment: .trailing, spacing: 6) {
-                Text(chat.lastUpdated, style: .time)
-                    .font(.caption)
-                    .foregroundColor(.gray)
-
-                if chat.unreadCount > 0 {
-                    Text("\(chat.unreadCount)")
-                        .font(.caption2)
-                        .foregroundColor(.white)
-                        .padding(6)
-                        .background(Color.blue)
-                        .clipShape(Circle())
+                
+                HStack(spacing: 4) {
+                    // Status indicator
+                    if chat.messageStatus == "SENT" {
+                        Image(systemName: "checkmark")
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                    } else if chat.messageStatus == "DELIVERED" {
+                        Image(systemName: "checkmark.circle")
+                            .font(.caption2)
+                            .foregroundColor(.blue)
+                    } else if chat.messageStatus == "READ" {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.caption2)
+                            .foregroundColor(.blue)
+                    }
+                    
+                    Text(chat.lastMessage)
+                        .font(.subheadline)
+                        .foregroundColor(.gray)
+                        .lineLimit(1)
                 }
             }
+            
+            Spacer()
+            
+            // Timestamp
+            VStack(alignment: .trailing, spacing: 4) {
+                Text(chat.timestamp, style: .relative)
+                    .font(.caption)
+                    .foregroundColor(.gray)
+            }
         }
-        .padding(.vertical, 6)
+        .padding(.vertical, 4)
     }
 }
