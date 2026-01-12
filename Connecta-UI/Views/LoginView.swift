@@ -15,13 +15,18 @@ struct LoginView: View {
     @State private var errorMessage = ""
 
     var body: some View {
-        NavigationView { // <-- Wrap in NavigationView
+        NavigationView {
+            
             VStack(spacing: 20) {
-                // Title
-                Text("Login")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                
+                // MARK: - Logo
+                Image("Connecta-Logo") // <-- Replace with your logo asset name
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 300, height: 200) // Adjust size as needed
                     .padding(.top, 50)
+
+                
 
                 // Username/Email field
                 TextField("Username or Email", text: $usernameOrEmail)
@@ -73,7 +78,7 @@ struct LoginView: View {
                 .padding(.bottom, 30)
 
             }
-            .padding(.top, 40)
+            .padding(.top, 20)
             .navigationBarHidden(true)
         }
     }
