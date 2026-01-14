@@ -2,7 +2,7 @@
 //  ChatView.swift
 //  Connecta-UI
 //
-//  Created by Nikhil on 08/01/26.
+//  Updated to support WebSocket real-time messaging
 //
 
 import SwiftUI
@@ -13,6 +13,9 @@ struct ChatView: View {
     @EnvironmentObject var authVM: AuthViewModel
     @StateObject private var viewModel = ChatViewModel()
     @State private var messageText: String = ""
+    @State private var showConnectionStatus = false
+    
+    @ObservedObject private var wsManager = WebSocketManager.shared
     
     private var currentUserName: String {
         authVM.currentUser?.username ?? "Unknown"
@@ -21,19 +24,29 @@ struct ChatView: View {
     var body: some View {
         VStack(spacing: 0) {
             
+            // MARK: - Connection Status Banner (Optional)
+            if showConnectionStatus {
+                connectionStatusBanner
+            }
+            
             // MARK: - Messages ScrollView
             ScrollViewReader { proxy in
                 ScrollView {
-                    VStack(spacing: 8) {
-                        ForEach(viewModel.messages) { msg in
-                            MessageBubble(
-                                message: msg,
-                                isCurrentUser: msg.authorName.lowercased() == currentUserName.lowercased()
-                            )
-                            .id(msg.id)
+                    if viewModel.isLoadingHistory {
+                        ProgressView("Loading messages...")
+                            .padding()
+                    } else {
+                        VStack(spacing: 8) {
+                            ForEach(viewModel.messages) { msg in
+                                MessageBubble(
+                                    message: msg,
+                                    isCurrentUser: msg.authorName.lowercased() == currentUserName.lowercased()
+                                )
+                                .id(msg.id)
+                            }
                         }
+                        .padding(.vertical)
                     }
-                    .padding(.vertical)
                 }
                 .onChange(of: viewModel.messages.count) { _ in
                     if let last = viewModel.messages.last {
@@ -80,8 +93,53 @@ struct ChatView: View {
             .background(Color(.systemBackground))
         }
         .navigationBarTitle(receiverName, displayMode: .inline)
+        .navigationBarItems(trailing: connectionStatusButton)
         .onAppear {
             loadChat()
+            connectWebSocket()
+        }
+        .onDisappear {
+            // Don't disconnect - keep WebSocket alive for other chats
+        }
+    }
+    
+    // MARK: - Connection Status Banner
+    private var connectionStatusBanner: some View {
+        HStack {
+            Circle()
+                .fill(wsManager.isConnected ? Color.green : Color.orange)
+                .frame(width: 8, height: 8)
+            
+            Text(wsManager.isConnected ? "Connected" : wsManager.connectionStatus)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            
+            Spacer()
+            
+            Button(action: { showConnectionStatus = false }) {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+        .background(Color(.systemGray6))
+    }
+    
+    // MARK: - Connection Status Button
+    private var connectionStatusButton: some View {
+        Button(action: { showConnectionStatus.toggle() }) {
+            Circle()
+                .fill(wsManager.isConnected ? Color.green : Color.orange)
+                .frame(width: 10, height: 10)
+        }
+    }
+    
+    // MARK: - Connect WebSocket
+    private func connectWebSocket() {
+        if !wsManager.isConnected {
+            wsManager.connect(username: currentUserName)
+            print("🔌 Connecting WebSocket for \(currentUserName)")
         }
     }
     
@@ -105,14 +163,15 @@ struct ChatView: View {
             status: "SENT"
         )
         
-        viewModel.messages.append(newMessage)
+        // Clear input immediately
         messageText = ""
         
-        viewModel.sendMessageToBackend(message: newMessage)
+        // Send via ViewModel (handles WebSocket + REST fallback)
+        viewModel.sendMessage(message: newMessage)
     }
 }
 
-// MARK: - Message Bubble View
+// MARK: - Message Bubble View (Keep existing implementation)
 struct MessageBubble: View {
     let message: Message
     let isCurrentUser: Bool

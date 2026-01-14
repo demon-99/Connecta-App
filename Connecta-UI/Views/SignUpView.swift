@@ -9,6 +9,7 @@ import SwiftUI
 struct SignUpView: View {
     @State private var email: String = ""
     @State private var fullName: String = ""
+    @State private var userName: String = ""
     @State private var password: String = ""
     @State private var confirmPassword: String = ""
     
@@ -36,6 +37,7 @@ struct SignUpView: View {
                 VStack(spacing: 16) {
                     InputView(placeholder: "Email or Phone Number", text: $email)
                     InputView(placeholder: "Full Name", text: $fullName)
+                    InputView(placeholder: "User Name", text: $userName)
                     InputView(placeholder: "Password", isSecureField: true, text: $password)
                     
                     ZStack(alignment: .trailing) {
@@ -126,7 +128,7 @@ struct SignUpView: View {
         let user = SignUpRequest(
             firstName: firstName,
             lastName: lastName,
-            username: email,
+            username: userName,
             email: email,
             password: password
         )

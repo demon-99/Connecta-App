@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		315E1BE82F16C64800AAF409 /* Starscream in Frameworks */ = {isa = PBXBuildFile; productRef = 315E1BE72F16C64800AAF409 /* Starscream */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		31DBBD4F2F0FFD9E0043FF9E /* Connecta-UI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Connecta-UI.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -43,6 +47,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				315E1BE82F16C64800AAF409 /* Starscream in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,8 +97,6 @@
 				31DBBD692F1000740043FF9E /* Services */,
 			);
 			name = "Connecta-UI";
-			packageProductDependencies = (
-			);
 			productName = "Connecta-UI";
 			productReference = 31DBBD4F2F0FFD9E0043FF9E /* Connecta-UI.app */;
 			productType = "com.apple.product-type.application";
@@ -122,6 +125,9 @@
 			);
 			mainGroup = 31DBBD462F0FFD9E0043FF9E;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				315E1BE62F16C64800AAF409 /* XCRemoteSwiftPackageReference "Starscream" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 31DBBD502F0FFD9E0043FF9E /* Products */;
 			projectDirPath = "";
@@ -356,6 +362,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		315E1BE62F16C64800AAF409 /* XCRemoteSwiftPackageReference "Starscream" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/daltoniam/Starscream";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.8;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		315E1BE72F16C64800AAF409 /* Starscream */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 315E1BE62F16C64800AAF409 /* XCRemoteSwiftPackageReference "Starscream" */;
+			productName = Starscream;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 31DBBD472F0FFD9E0043FF9E /* Project object */;
 }
