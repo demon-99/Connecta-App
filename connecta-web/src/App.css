@@ -1,0 +1,357 @@
+.app {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: 100vh;
+  max-height: 100svh;
+  background: #0b0f19;
+  color: #e5e7eb;
+}
+
+.sidebar {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(11, 15, 25, 0.9));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.me {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.meName {
+  font-weight: 600;
+}
+
+.meSub {
+  font-size: 12px;
+  color: rgba(229, 231, 235, 0.7);
+}
+
+.ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e5e7eb;
+  border-radius: 10px;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.sectionTitle {
+  padding: 12px 16px 8px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(229, 231, 235, 0.7);
+}
+
+.list {
+  overflow: auto;
+  padding: 0 8px 12px;
+}
+
+.row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.row.active {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(59, 130, 246, 0.25);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  font-weight: 700;
+}
+
+.rowTitle {
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.rowSub {
+  font-size: 12px;
+  color: rgba(229, 231, 235, 0.65);
+}
+
+.chat {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-width: 0;
+}
+
+.chatHeader {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 15, 25, 0.9);
+}
+
+.chatTitle {
+  font-weight: 700;
+}
+
+.chatSub {
+  font-size: 12px;
+  color: rgba(229, 231, 235, 0.65);
+}
+
+.chatBody {
+  padding: 16px 18px;
+  overflow: auto;
+  background: radial-gradient(1200px 800px at 20% 0%, rgba(59, 130, 246, 0.12), transparent 60%),
+    radial-gradient(1000px 700px at 100% 10%, rgba(168, 85, 247, 0.10), transparent 55%),
+    #0b0f19;
+}
+
+.empty {
+  color: rgba(229, 231, 235, 0.75);
+  padding: 40px 0;
+}
+
+.emptySub {
+  margin-top: 10px;
+  font-size: 12px;
+  color: rgba(229, 231, 235, 0.55);
+}
+
+.bubbleRow {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.bubbleRow.me {
+  justify-content: flex-end;
+}
+
+.bubble {
+  max-width: min(560px, 82%);
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(8px);
+}
+
+.bubbleRow.me .bubble {
+  background: rgba(59, 130, 246, 0.22);
+  border-color: rgba(59, 130, 246, 0.25);
+}
+
+.bubbleText {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.bubbleMeta {
+  margin-top: 6px;
+  font-size: 11px;
+  color: rgba(229, 231, 235, 0.6);
+  text-align: right;
+}
+
+.chatInput {
+  display: flex;
+  gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 15, 25, 0.92);
+  align-items: center;
+}
+
+.toolRow {
+  display: flex;
+  gap: 8px;
+}
+
+.tool {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e5e7eb;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 16px;
+}
+
+.tool:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 15, 25, 0.92);
+}
+
+.pick {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e5e7eb;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+}
+
+.pick.big {
+  width: 68px;
+  height: 56px;
+  font-size: 32px;
+}
+
+.chatInput input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e5e7eb;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.chatInput input:focus {
+  border-color: rgba(59, 130, 246, 0.45);
+}
+
+.chatInput button {
+  border-radius: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.30);
+  color: #e5e7eb;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.chatInput button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(900px 500px at 30% 10%, rgba(59, 130, 246, 0.20), transparent 60%),
+    radial-gradient(900px 500px at 90% 40%, rgba(168, 85, 247, 0.14), transparent 55%),
+    #0b0f19;
+  color: #e5e7eb;
+}
+
+.card {
+  width: min(440px, 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(17, 24, 39, 0.70);
+  backdrop-filter: blur(10px);
+  padding: 18px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(59, 130, 246, 0.9);
+  box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.18);
+}
+
+.title {
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: rgba(229, 231, 235, 0.65);
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+}
+
+.form label {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(229, 231, 235, 0.8);
+}
+
+.form input {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e5e7eb;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.form input:focus {
+  border-color: rgba(59, 130, 246, 0.45);
+}
+
+.form button {
+  margin-top: 6px;
+  border-radius: 12px;
+  border: 1px solid rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.30);
+  color: #e5e7eb;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.hint {
+  margin-top: 12px;
+  font-size: 12px;
+  color: rgba(229, 231, 235, 0.7);
+}
+
+.hint.small {
+  margin-top: 8px;
+  color: rgba(229, 231, 235, 0.55);
+}

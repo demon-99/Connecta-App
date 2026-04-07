@@ -98,55 +98,55 @@ struct FriendsView: View {
             .onAppear {
                 loadFriends()
             }
+            .refreshable {
+                loadFriends()
+            }
         }
     }
     
     private func loadFriends() {
-        // TODO: Implement API call to fetch friends
-        // For now, using mock data
         isLoading = true
         errorMessage = ""
         
-        // Simulate API call
-        Task {
-            try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
-            await MainActor.run {
+        AuthService.shared.fetchUsers { result in
+            DispatchQueue.main.async {
                 isLoading = false
-                // Mock friends data
-                friends = [
-                    User(
-                        userId: "1",
-                        username: "alice",
-                        firstName: "Alice",
-                        lastName: "Johnson",
-                        email: "alice@example.com",
-                        profilePicture: nil,
-                        bio: "Love coding and coffee ☕️",
-                        isVerified: true,
-                        phoneNumber: "+1234567890",
-                        language: "English",
-                        theme: "Light",
-                        createdAt: ISO8601DateFormatter().string(from: Date()),
-                        updatedAt: ISO8601DateFormatter().string(from: Date())
-                    ),
-                    User(
-                        userId: "2",
-                        username: "bob",
-                        firstName: "Bob",
-                        lastName: "Smith",
-                        email: "bob@example.com",
-                        profilePicture: nil,
-                        bio: "Tech enthusiast",
-                        isVerified: false,
-                        phoneNumber: "+1234567891",
-                        language: "English",
-                        theme: "Dark",
-                        createdAt: ISO8601DateFormatter().string(from: Date()),
-                        updatedAt: ISO8601DateFormatter().string(from: Date())
-                    )
-                ]
+                
+                switch result {
+                case .success(let userProfiles):
+                    // Convert UserProfileResponseDto to User objects
+                    self.friends = userProfiles.map { profile in
+                        User(
+                            userId: profile.userId,
+                            username: profile.username,
+                            firstName: profile.firstName,
+                            lastName: profile.lastName,
+                            email: "", // Not provided in UserProfileResponseDto
+                            // Check if profilePicture is non-empty, else set it as nil
+                            profilePicture: profile.profilePicture?.isEmpty ?? true ? nil : profile.profilePicture,
+                            // Check if bio is non-empty, else set it as nil
+                            bio: (profile.bio?.isEmpty ?? true) ? nil : profile.bio,
+                            isVerified: profile.isVerified,
+                            phoneNumber: profile.phoneNumber,
+                            language: nil, // Not provided in UserProfileResponseDto
+                            theme: nil, // Not provided in UserProfileResponseDto
+                            createdAt: ISO8601DateFormatter().string(from: Date()),
+                            updatedAt: ISO8601DateFormatter().string(from: Date())
+                        )
+                    }
+                    
+                    // Optionally filter out the current user
+                    if let currentUserId = authVM.currentUser?.userId {
+                        self.friends = self.friends.filter { $0.userId != currentUserId }
+                    }
+                    
+                case .failure(let error):
+                    self.errorMessage = "Failed to load friends: \(error.localizedDescription)"
+                    print("Error fetching users: \(error)")
+                }
             }
         }
     }
+
 }
 

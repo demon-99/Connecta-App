@@ -12,7 +12,7 @@ class ChatService {
     
     static let shared = ChatService() // Singleton
     
-    private let baseURL = "http://172.20.10.3:8080/api/chat"
+    private let baseURL = "http://172.20.10.4:8080/api/chat"
     
     // MARK: - Get Chat List
     func getChatList(
@@ -196,21 +196,26 @@ class ChatService {
                 return
             }
             
-            guard let data = data else {
+            // Backend may return an empty body (or a saved Message). Handle both.
+            let responseData = data ?? Data()
+            if responseData.isEmpty {
                 DispatchQueue.main.async {
-                    completion(.failure(NetworkError.noData))
+                    completion(.success(message))
                 }
                 return
             }
-            
+
             do {
                 let decoder = JSONDecoder()
-                let sentMessage = try decoder.decode(Message.self, from: data)
+                let sentMessage = try decoder.decode(Message.self, from: responseData)
                 DispatchQueue.main.async {
                     completion(.success(sentMessage))
                 }
             } catch {
                 print("Send Message decoding error: \(error)")
+                if let jsonString = String(data: responseData, encoding: .utf8) {
+                    print("Raw send response JSON:\n\(jsonString)")
+                }
                 DispatchQueue.main.async {
                     completion(.failure(NetworkError.decodingError))
                 }

@@ -7,10 +7,9 @@ import com.nikhil.Connecta.repository.MessageRepository;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.sound.midi.Receiver;
+import java.time.Instant;
 import java.util.List;
 
 
@@ -20,10 +19,16 @@ public class ChatService {
     private final MessageRepository messageRepository;
     private static final Logger logger = LoggerFactory.getLogger(ChatService.class);
 
-    public void send(MessageDto messageDto){
+    public Message send(MessageDto messageDto){
+        if (messageDto.getTimestamp() == null) {
+            messageDto.setTimestamp(Instant.now());
+        }
+        if (messageDto.getStatus() == null) {
+            messageDto.setStatus(MessageDto.MessageStatus.SENT);
+        }
         Message message = new Message(messageDto);
         logger.info(message.toString());
-        messageRepository.save(message);
+        return messageRepository.save(message);
     }
     public List<Message> getChatHistory(String authorName,String receiverName){
         logger.info(authorName+" "+receiverName);

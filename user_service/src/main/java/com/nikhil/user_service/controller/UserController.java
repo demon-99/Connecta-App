@@ -1,6 +1,7 @@
 package com.nikhil.user_service.controller;
 
 import com.nikhil.user_service.dto.LoginRequestDto;
+import com.nikhil.user_service.dto.UserProfileResponseDto;
 import com.nikhil.user_service.dto.UserRequestDto;
 import com.nikhil.user_service.entity.User;
 import com.nikhil.user_service.service.UserService;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @AllArgsConstructor
@@ -95,6 +97,11 @@ public class UserController {
             // Handle user not found case
             return new ResponseEntity<>(Map.of("message", "User not found"), HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/fetchusers")
+    public ResponseEntity<List<UserProfileResponseDto>> fetchUsers(){
+        return new ResponseEntity<>(userService.fetchUsers(),HttpStatus.OK);
     }
 
 }

@@ -23,11 +23,12 @@ class WebSocketManager: ObservableObject, WebSocketDelegate {
     private var currentUsername: String?
     private var subscriptions: [String: Int] = [:]
     private var nextSubscriptionId = 0
+    private var isStompConnected = false
     
     // Callback for received messages
     var onMessageReceived: ((Message) -> Void)?
     
-    private let baseURL = "ws://172.20.10.3:8080/ws" // Match your REST API base
+    private let baseURL = "ws://172.20.10.4:8080/ws" // STOMP endpoint (Spring)
     
     // MARK: - Initialization
     private init() {}
@@ -40,8 +41,12 @@ class WebSocketManager: ObservableObject, WebSocketDelegate {
         }
         
         self.currentUsername = username
+        self.isStompConnected = false
         
-        guard let url = URL(string: baseURL) else {
+        var components = URLComponents(string: baseURL)
+        components?.queryItems = [URLQueryItem(name: "username", value: username)]
+
+        guard let url = components?.url else {
             print("❌ Invalid WebSocket URL")
             return
         }
@@ -64,6 +69,7 @@ class WebSocketManager: ObservableObject, WebSocketDelegate {
         isConnected = false
         connectionStatus = "Disconnected"
         subscriptions.removeAll()
+        isStompConnected = false
         print("🔌 Disconnected from WebSocket")
     }
     
@@ -82,7 +88,7 @@ class WebSocketManager: ObservableObject, WebSocketDelegate {
     }
     
     private func subscribeToPrivateMessages() {
-        guard let username = currentUsername else { return }
+        guard currentUsername != nil else { return }
         
         let subId = nextSubscriptionId
         nextSubscriptionId += 1
@@ -98,39 +104,6 @@ class WebSocketManager: ObservableObject, WebSocketDelegate {
         subscriptions["/user/queue/messages"] = subId
         socket?.write(string: subscribeFrame)
         print("📥 Subscribed to /user/queue/messages (id: sub-\(subId))")
-    }
-    
-    private func subscribeToPublicMessages() {
-        let subId = nextSubscriptionId
-        nextSubscriptionId += 1
-        
-        let subscribeFrame = """
-        SUBSCRIBE
-        id:sub-\(subId)
-        destination:/topic/public
-        
-        \u{0000}
-        """
-        
-        subscriptions["/topic/public"] = subId
-        socket?.write(string: subscribeFrame)
-        print("📥 Subscribed to /topic/public (id: sub-\(subId))")
-    }
-    
-    private func sendUserConnect() {
-        guard let username = currentUsername else { return }
-        
-        let message = Message(
-            id: UUID().uuidString,
-            authorName: username,
-            receiverName: "",
-            message: "\(username) joined",
-            timestamp: ISO8601DateFormatter().string(from: Date()),
-            status: "SENT"
-        )
-        
-        sendStompMessage(destination: "/app/user-connect", message: message)
-        print("👋 Sent user connect notification")
     }
     
     private func sendDisconnect() {
@@ -181,17 +154,11 @@ class WebSocketManager: ObservableObject, WebSocketDelegate {
             // Send STOMP CONNECT frame
             sendConnect()
             
-            // Wait a bit for CONNECTED response, then subscribe
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                self.subscribeToPrivateMessages()
-                self.subscribeToPublicMessages()
-                self.sendUserConnect()
-            }
-            
         case .disconnected(let reason, let code):
             print("❌ WebSocket Disconnected: \(reason) (Code: \(code))")
             isConnected = false
             connectionStatus = "Disconnected"
+            isStompConnected = false
             
         case .text(let text):
             print("📨 Received frame:\n\(text)")
@@ -204,11 +171,13 @@ class WebSocketManager: ObservableObject, WebSocketDelegate {
             print("❌ WebSocket Error: \(error?.localizedDescription ?? "Unknown")")
             isConnected = false
             connectionStatus = "Error"
+            isStompConnected = false
             
         case .cancelled:
             print("⚠️ WebSocket Cancelled")
             isConnected = false
             connectionStatus = "Cancelled"
+            isStompConnected = false
             
         case .ping(_):
             print("🏓 Ping received")
@@ -226,6 +195,7 @@ class WebSocketManager: ObservableObject, WebSocketDelegate {
             print("👋 Peer closed connection")
             isConnected = false
             connectionStatus = "Peer Closed"
+            isStompConnected = false
         }
     }
     
@@ -238,6 +208,10 @@ class WebSocketManager: ObservableObject, WebSocketDelegate {
         switch command {
         case "CONNECTED":
             print("✅ STOMP Connected")
+            if !isStompConnected {
+                isStompConnected = true
+                subscribeToPrivateMessages()
+            }
             
         case "MESSAGE":
             parseMessageFrame(frame)

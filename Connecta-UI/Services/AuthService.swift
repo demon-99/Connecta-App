@@ -12,9 +12,10 @@ import Foundation
 class AuthService {
     static let shared = AuthService() // Singleton
     
-    private let loginURL = "http://172.20.10.3:8081/api/user/login"
-    private let profileURL = "http://172.20.10.3:8081/api/user/profile"
-    private let signUpURL = "http://172.20.10.3:8081/api/user/create"
+    private let loginURL = "http://172.20.10.4:8081/api/user/login"
+    private let profileURL = "http://172.20.10.4:8081/api/user/profile"
+    private let signUpURL = "http://172.20.10.4:8081/api/user/create"
+    private let fetchFriendsURL = "http://172.20.10.4:8081/api/user/fetchusers"
 
     // MARK: - Login
     func login(usernameOrEmail: String, password: String, completion: @escaping (Result<LoginResponseDto, Error>) -> Void) {
@@ -137,6 +138,49 @@ class AuthService {
                 }
             }.resume()
         }
+    // MARK: - Fetch Users
+    func fetchUsers(completion: @escaping (Result<[UserProfileResponseDto], Error>) -> Void) {
+        guard let url = URL(string: fetchFriendsURL) else {
+            completion(.failure(NetworkError.invalidURL))
+            return
+        }
+        
+        // Create a URL request
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+        // Perform the network request
+        URLSession.shared.dataTask(with: request) { data, _, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NetworkError.noData))
+                return
+            }
+            
+            // Decode the data into the array of UserProfileResponseDto
+            do {
+                let decoder = JSONDecoder()
+                
+                // If you have date formatting issues, you may need to set the decoder's dateDecodingStrategy
+                // decoder.dateDecodingStrategy = .iso8601
+                
+                let users = try decoder.decode([UserProfileResponseDto].self, from: data)
+                completion(.success(users))
+            } catch {
+                print("Decoding error: \(error)")
+                if let json = String(data: data, encoding: .utf8) {
+                    print("Raw response: \(json)")
+                }
+                completion(.failure(NetworkError.decodingError))
+            }
+        }.resume()
+    }
+
 }
 
 // MARK: - Network Errors

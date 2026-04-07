@@ -12,8 +12,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // Register both native WebSocket and SockJS fallback on the same endpoint.
+        // We also assign a Principal from `?username=...` so `/user/queue/...` works
+        // without requiring Spring Security auth.
         registry.addEndpoint("/ws")
                 .setAllowedOriginPatterns("*")
+                .setHandshakeHandler(new UsernameHandshakeHandler());
+
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*")
+                .setHandshakeHandler(new UsernameHandshakeHandler())
                 .withSockJS();
     }
 

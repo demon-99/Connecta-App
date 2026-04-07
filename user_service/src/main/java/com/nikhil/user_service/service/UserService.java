@@ -1,6 +1,7 @@
 package com.nikhil.user_service.service;
 
 import com.nikhil.user_service.dto.LoginRequestDto;
+import com.nikhil.user_service.dto.UserProfileResponseDto;
 import com.nikhil.user_service.dto.UserRequestDto;
 import com.nikhil.user_service.entity.User;
 import com.nikhil.user_service.repository.UserRepository;
@@ -12,6 +13,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -61,5 +63,8 @@ public class UserService {
 
         // Use orElseThrow to throw an exception if user is not present
         return userOptional.orElseThrow(() -> new Exception("User not found."));
+    }
+    public List <UserProfileResponseDto> fetchUsers(){
+        return userRepository.findUserProfileData();
     }
 }

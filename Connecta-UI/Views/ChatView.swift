@@ -14,6 +14,8 @@ struct ChatView: View {
     @StateObject private var viewModel = ChatViewModel()
     @State private var messageText: String = ""
     @State private var showConnectionStatus = false
+    @State private var showEmojiPicker = false
+    @State private var showStickerPicker = false
     
     @ObservedObject private var wsManager = WebSocketManager.shared
     
@@ -61,9 +63,14 @@ struct ChatView: View {
             
             // MARK: - Signal-style Input Bar
             HStack(spacing: 8) {
-                Image(systemName: "plus.circle.fill")
-                    .font(.system(size: 28))
-                    .foregroundColor(.blue)
+                Menu {
+                    Button("Stickers") { showStickerPicker = true }
+                    Button("Emoji") { showEmojiPicker = true }
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(.blue)
+                }
                 
                 ZStack {
                     RoundedRectangle(cornerRadius: 20)
@@ -100,6 +107,18 @@ struct ChatView: View {
         }
         .onDisappear {
             // Don't disconnect - keep WebSocket alive for other chats
+        }
+        .sheet(isPresented: $showEmojiPicker) {
+            EmojiPicker { emoji in
+                messageText.append(emoji)
+                showEmojiPicker = false
+            }
+        }
+        .sheet(isPresented: $showStickerPicker) {
+            StickerPicker { stickerId in
+                sendSticker(stickerId)
+                showStickerPicker = false
+            }
         }
     }
     
@@ -169,6 +188,18 @@ struct ChatView: View {
         // Send via ViewModel (handles WebSocket + REST fallback)
         viewModel.sendMessage(message: newMessage)
     }
+
+    private func sendSticker(_ stickerId: String) {
+        let newMessage = Message(
+            id: UUID().uuidString,
+            authorName: currentUserName,
+            receiverName: receiverName,
+            message: "sticker:\(stickerId)",
+            timestamp: ISO8601DateFormatter().string(from: Date()),
+            status: "SENT"
+        )
+        viewModel.sendMessage(message: newMessage)
+    }
 }
 
 // MARK: - Message Bubble View (Keep existing implementation)
@@ -181,11 +212,7 @@ struct MessageBubble: View {
             if isCurrentUser { Spacer() }
             
             VStack(alignment: isCurrentUser ? .trailing : .leading, spacing: 4) {
-                Text(message.message)
-                    .padding(10)
-                    .foregroundColor(isCurrentUser ? .white : .black)
-                    .background(isCurrentUser ? Color.blue : Color.gray.opacity(0.2))
-                    .cornerRadius(16)
+                bubbleContent
                 
                 HStack(spacing: 4) {
                     Text(formatTime(message.timestamp))
@@ -203,6 +230,42 @@ struct MessageBubble: View {
             if !isCurrentUser { Spacer() }
         }
         .padding(.horizontal, 8)
+    }
+
+    @ViewBuilder
+    private var bubbleContent: some View {
+        if let stickerId = parseStickerId(message.message) {
+            Text(stickerEmoji(for: stickerId))
+                .font(.system(size: 56))
+                .padding(6)
+                .background(Color.clear)
+        } else {
+            Text(message.message)
+                .padding(10)
+                .foregroundColor(isCurrentUser ? .white : .black)
+                .background(isCurrentUser ? Color.blue : Color.gray.opacity(0.2))
+                .cornerRadius(16)
+        }
+    }
+
+    private func parseStickerId(_ text: String) -> String? {
+        guard text.hasPrefix("sticker:") else { return nil }
+        let id = String(text.dropFirst("sticker:".count))
+        return id.isEmpty ? nil : id
+    }
+
+    private func stickerEmoji(for id: String) -> String {
+        switch id {
+        case "party": return "🥳"
+        case "lol": return "😂"
+        case "love": return "😍"
+        case "fire": return "🔥"
+        case "ok": return "👌"
+        case "sad": return "😢"
+        case "wow": return "🤯"
+        case "thumbs": return "👍"
+        default: return "✨"
+        }
     }
     
     private func formatTime(_ isoString: String) -> String {
@@ -229,6 +292,70 @@ struct MessageBubble: View {
                 .foregroundColor(.blue)
         default:
             EmptyView()
+        }
+    }
+}
+
+struct EmojiPicker: View {
+    let onSelect: (String) -> Void
+
+    private let emojis: [String] = ["😀", "😅", "😂", "😍", "😘", "😎", "😭", "😤", "🤯", "👍", "🙏", "🔥", "✨", "🎉", "💯", "❤️"]
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 6), spacing: 12) {
+                    ForEach(emojis, id: \.self) { e in
+                        Button(action: { onSelect(e) }) {
+                            Text(e)
+                                .font(.system(size: 32))
+                                .frame(maxWidth: .infinity, minHeight: 54)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(12)
+                        }
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Emoji")
+            .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+}
+
+struct StickerPicker: View {
+    let onSelect: (String) -> Void
+    private let stickers: [(id: String, preview: String)] = [
+        ("party", "🥳"),
+        ("lol", "😂"),
+        ("love", "😍"),
+        ("fire", "🔥"),
+        ("ok", "👌"),
+        ("sad", "😢"),
+        ("wow", "🤯"),
+        ("thumbs", "👍"),
+    ]
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 12) {
+                    ForEach(stickers, id: \.id) { s in
+                        Button(action: { onSelect(s.id) }) {
+                            VStack(spacing: 6) {
+                                Text(s.preview).font(.system(size: 44))
+                                Text(s.id).font(.caption).foregroundColor(.secondary)
+                            }
+                            .frame(maxWidth: .infinity, minHeight: 96)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(14)
+                        }
+                    }
+                }
+                .padding()
+            }
+            .navigationTitle("Stickers")
+            .navigationBarTitleDisplayMode(.inline)
         }
     }
 }
